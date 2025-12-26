@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Symbolcards Reading</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(to bottom, #e0f7fa, #b2ebf2); color: #333; text-align: center; padding: 20px; }
+        h1 { color: #006064; }
+        .buttons { margin: 40px; }
+        button { padding: 15px 30px; margin: 10px; font-size: 18px; background: #00bcd4; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        button:hover { background: #0097a7; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #ownerBtn { background: #8e24aa; }
+        #ownerBtn:hover { background: #6a1b9a; }
+        .card-container { margin: 40px auto; max-width: 95%; display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
+        .card-wrapper { perspective: 1000px; }
+        .card { width: 350px; height: 500px; position: relative; transform-style: preserve-3d; transition: transform 1s; }
+        .card.flipped { transform: rotateY(180deg); }
+        .front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .front { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #666; }
+        .back { transform: rotateY(180deg); }
+        .back img { width: 100%; height: 100%; object-fit: contain; border-radius: 15px; background: white; }
+        .message { font-size: 20px; margin: 20px; color: #d32f2f; }
+        @media (max-width: 600px) { .card { width: 90%; height: auto; } .back img { height: auto; } }
+    </style>
+</head>
+<body>
+    <h1>My Symbolcards Reading</h1>
+    <p>Draw your daily guidance or weekly insight – completely free.</p>
+    
+    <div class="buttons">
+        <button id="dailyBtn">Draw Your Daily Card</button>
+        <button id="weeklyBtn">Weekly 3-Card Draw</button>
+        <button id="ownerBtn" style="display:none;">Preview Card (Owner only)</button>
+    </div>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="card-container" id="cards"></div>
+
+    <script>
+        const cardUrls = [
+            "https://i.ibb.co/20YgdK7C/symbol-card.jpg",
+            "https://i.ibb.co/S7HhYTBW/symbol-card.jpg",
+            "https://i.ibb.co/sp2rg8vn/symbol-card.jpg",
+            "https://i.ibb.co/bjjLkHty/symbol-card.jpg",
+            "https://i.ibb.co/bRCQHQyn/symbol-card.jpg",
+            "https://i.ibb.co/Xx9H0cCL/symbol-card.jpg",
+            "https://i.ibb.co/5WY7yzZC/symbol-card.jpg",
+            "https://i.ibb.co/dwcp6Z5z/symbol-card.jpg",
+            "https://i.ibb.co/tTL06pC4/symbol-card.jpg",
+            "https://i.ibb.co/7JmgnjT3/symbol-card.jpg",
+            "https://i.ibb.co/8DBgZgfq/symbol-card.jpg",
+            "https://i.ibb.co/fVgD4XBg/symbol-card.jpg",
+            "https://i.ibb.co/HDnjzM6G/symbol-card.jpg",
+            "https://i.ibb.co/fY9Pzbh7/symbol-card.jpg",
+            "https://i.ibb.co/Fks37Fyg/symbol-card.jpg",
+            "https://i.ibb.co/67SWn5v2/symbol-card.jpg",
+            "https://i.ibb.co/KT0HH9m/symbol-card.jpg",
+            "https://i.ibb.co/RkbkHrV5/symbol-card.jpg",
+            "https://i.ibb.co/RGh5DJWC/symbol-card.jpg",
+            "https://i.ibb.co/5xtzXQSb/symbol-card.jpg",
+            "https://i.ibb.co/ZzHTbCm7/symbol-card.jpg",
+            "https://i.ibb.co/BHb4NbLQ/symbol-card.jpg",
+            "https://i.ibb.co/9mVXsBpd/symbol-card.jpg",
+            "https://i.ibb.co/8LmmRyhY/symbol-card.jpg",
+            "https://i.ibb.co/QvCL6ZBG/symbol-card.jpg",
+            "https://i.ibb.co/99SY1P91/symbol-card.jpg",
+            "https://i.ibb.co/4wgJQL6d/symbol-card.jpg",
+            "https://i.ibb.co/DgGvgC0S/symbol-card.jpg",
+            "https://i.ibb.co/6SpQTPy/symbol-card.jpg",
+            "https://i.ibb.co/1GYmjyTb/symbol-card.jpg",
+            "https://i.ibb.co/hRsG8fs0/symbol-card.jpg",
+            "https://i.ibb.co/HDs97cjQ/symbol-card.jpg",
+            "https://i.ibb.co/Ndys9XWB/symbol-card.jpg",
+            "https://i.ibb.co/ymwzMfNQ/symbol-card.jpg",
+            "https://i.ibb.co/spRkjZN9/symbol-card.jpg",
+            "https://i.ibb.co/9k7hrnHf/symbol-card.jpg",
+            "https://i.ibb.co/20YgdK7C/symbol-card.jpg",
+            "https://i.ibb.co/S7HhYTBW/symbol-card.jpg",
+            "https://i.ibb.co/sp2rg8vn/symbol-card.jpg",
+            "https://i.ibb.co/bjjLkHty/symbol-card.jpg",
+            "https://i.ibb.co/bRCQHQyn/symbol-card.jpg",
+            "https://i.ibb.co/Xx9H0cCL/symbol-card.jpg",
+            "https://i.ibb.co/5WY7yzZC/symbol-card.jpg",
+            "https://i.ibb.co/dwcp6Z5z/symbol-card.jpg",
+            "https://i.ibb.co/tTL06pC4/symbol-card.jpg",
+            "https://i.ibb.co/7JmgnjT3/symbol-card.jpg",
+            "https://i.ibb.co/8DBgZgfq/symbol-card.jpg",
+            "https://i.ibb.co/fVgD4XBg/symbol-card.jpg",
+            "https://i.ibb.co/HDnjzM6G/symbol-card.jpg",
+            "https://i.ibb.co/fY9Pzbh7/symbol-card.jpg",
+            "https://i.ibb.co/Fks37Fyg/symbol-card.jpg",
+            "https://i.ibb.co/67SWn5v2/symbol-card.jpg",
+            "https://i.ibb.co/KT0HH9m/symbol-card.jpg",
+            "https://i.ibb.co/RkbkHrV5/symbol-card.jpg",
+            "https://i.ibb.co/RGh5DJWC/symbol-card.jpg",
+            "https://i.ibb.co/5xtzXQSb/symbol-card.jpg",
+            "https://i.ibb.co/ZzHTbCm7/symbol-card.jpg",
+            "https://i.ibb.co/BHb4NbLQ/symbol-card.jpg",
+            "https://i.ibb.co/9mVXsBpd/symbol-card.jpg",
+            "https://i.ibb.co/8LmmRyhY/symbol-card.jpg",
+            "https://i.ibb.co/QvCL6ZBG/symbol-card.jpg",
+            "https://i.ibb.co/99SY1P91/symbol-card.jpg",
+            "https://i.ibb.co/4wgJQL6d/symbol-card.jpg",
+            "https://i.ibb.co/DgGvgC0S/symbol-card.jpg",
+            "https://i.ibb.co/6SpQTPy/symbol-card.jpg",
+            "https://i.ibb.co/1GYmjyTb/symbol-card.jpg",
+            "https://i.ibb.co/hRsG8fs0/symbol-card.jpg",
+            "https://i.ibb.co/HDs97cjQ/symbol-card.jpg",
+            "https://i.ibb.co/Ndys9XWB/symbol-card.jpg",
+            "https://i.ibb.co/ymwzMfNQ/symbol-card.jpg",
+            "https://i.ibb.co/spRkjZN9/symbol-card.jpg",
+            "https://i.ibb.co/9k7hrnHf/symbol-card.jpg"
+        ];
+
+        const totalCards = cardUrls.length;
+
+        const dailyBtn = document.getElementById('dailyBtn');
+        const weeklyBtn = document.getElementById('weeklyBtn');
+        const ownerBtn = document.getElementById('ownerBtn');
+        const message = document.getElementById('message');
+        const cardsDiv = document.getElementById('cards');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isOwner = urlParams.get('owner') === '1';
+        if (isOwner) {
+            ownerBtn.style.display = 'inline-block';
+        }
+
+        function getWeekNumber() {
+            const d = new Date();
+            d.setHours(0,0,0,0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(),0,1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7) + '-' + d.getFullYear();
+        }
+
+        function checkDaily() {
+            const today = new Date().toDateString();
+            if (localStorage.getItem('dailyDate') === today) {
+                dailyBtn.disabled = true;
+                message.textContent = 'You have already drawn your daily card today. Come back tomorrow!';
+            } else {
+                dailyBtn.disabled = false;
+            }
+        }
+
+        function checkWeekly() {
+            const week = getWeekNumber();
+            if (localStorage.getItem('weeklyWeek') === week) {
+                weeklyBtn.disabled = true;
+                message.textContent = 'You have already drawn your weekly 3-card draw. Come back next week!';
+            } else {
+                weeklyBtn.disabled = false;
+            }
+        }
+
+        function drawCard() {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card-wrapper';
+            const card = document.createElement('div');
+            card.className = 'card';
+            const front = document.createElement('div');
+            front.className = 'front';
+            front.textContent = 'Symbol Card';
+            const back = document.createElement('div');
+            back.className = 'back';
+            const img = document.createElement('img');
+            img.src = cardUrls[Math.floor(Math.random() * totalCards)];
+            img.alt = 'Symbol Card';
+            back.appendChild(img);
+            card.appendChild(front);
+            card.appendChild(back);
+            wrapper.appendChild(card);
+            setTimeout(() => card.classList.add('flipped'), 100);
+            return wrapper;
+        }
+
+        dailyBtn.addEventListener('click', () => {
+            cardsDiv.innerHTML = '';
+            message.textContent = 'Your daily card:';
+            cardsDiv.appendChild(drawCard());
+            localStorage.setItem('dailyDate', new Date().toDateString());
+            checkDaily();
+            checkWeekly();
+        });
+
+        weeklyBtn.addEventListener('click', () => {
+            cardsDiv.innerHTML = '';
+            message.textContent = 'Your weekly 3-card draw:';
+            const selected = [];
+            while (selected.length < 3) {
+                const rand = Math.floor(Math.random() * totalCards);
+                if (!selected.includes(rand)) selected.push(rand);
+            }
+            selected.forEach(i => {
+                const wrapper = drawCard();
+                wrapper.querySelector('img').src = cardUrls[i];
+                cardsDiv.appendChild(wrapper);
+            });
+            localStorage.setItem('weeklyWeek', getWeekNumber());
+            checkWeekly();
+            checkDaily();
+        });
+
+        ownerBtn.addEventListener('click', () => {
+            cardsDiv.innerHTML = '';
+            message.textContent = 'Owner preview – no limits:';
+            for (let i = 0; i < 3; i++) {
+                cardsDiv.appendChild(drawCard());
+            }
+        });
+
+        checkDaily();
+        checkWeekly();
+    </script>
+</body>
+</html>
